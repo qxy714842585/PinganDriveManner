@@ -165,6 +165,17 @@ def get_speed_freq(user_data):
     speed_freq = list(map(lambda x: x/record_num, speed_times))
     return speed_freq
 
+
+def get_location(user_data):
+    freq = get_location_area(user_data)
+    freq_dict = {'000': 0, '001': 0, '010': 0, '011': 0
+        , '100': 0, '101': 0, '110': 0, '111': 0}
+    for i in freq_dict:
+        freq_dict[i] = freq.pop(0)
+    a = sorted(freq_dict.items(), key=lambda e:e[1])
+    b = a[0][0]
+    return [int(i) for i in b]
+
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -206,7 +217,8 @@ def form_dataset(data):
         , 'num_of_state_1', 'num_of_state_2','num_of_state_3', 'num_of_state_4'
         ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'tp0', 'tp1'
         , 'tp2', 'tp3', 'tp4', 'tp5', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
-        , 'a7', 'duration', 'sf0', 'sf1', 'sf2', 'sf3', 'target']
+        , 'a7', 'duration', 'sf0', 'sf1', 'sf2', 'sf3', 'loc0', 'loc1', 'loc2'
+        , 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name
