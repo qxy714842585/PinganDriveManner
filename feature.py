@@ -199,6 +199,7 @@ def form_user_feature(user_data, user_id):
 
     user_feature.extend(get_duration(user_data))
     user_feature.extend(get_speed_freq(user_data))
+    user_feature.extend(get_location(user_data))
 
         #todo 2 add new feature list before this line
 
