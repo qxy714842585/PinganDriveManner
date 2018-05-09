@@ -96,7 +96,10 @@ def get_user_data(data, user_id):
     distance = [0]
     for i in range(1, len(lat)):
         if trip_id[i] == trip_id[i - 1]:
-            distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1])*60/(time[i]-time[i-1]))
+            if time[i]-time[i-1] != 0:
+                distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1])*60/(time[i]-time[i-1]))
+            else:
+                distance.append(0)
         else:
             distance.append(0)
     # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
