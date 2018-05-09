@@ -49,7 +49,7 @@ def train_model():
         "colsample_bytree": .35, "scale_pos_weight": 0.9# "nthread":16
     }
     df_train = xgb.DMatrix(train_set[feature].fillna(-1), label)
-    gbm = xgb.train(params, df_train, num_boost_round=960)
+    gbm = xgb.train(params, df_train, num_boost_round=1000)
     pickle.dump(gbm, open("model.pickle.dat", "wb"))
     print("Model Trained!")
 
