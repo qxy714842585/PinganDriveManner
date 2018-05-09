@@ -29,34 +29,34 @@ def haversine1(lon1, lat1, lon2, lat2):  # 经度1，纬度1，经度2，纬度2
     r = 6371  # 地球平均半径，单位为公里
     return c * r * 1000
 
-# def get_user_data(data, user_id):
-#     """
-#     输出特定用户的所有数据，并根据trip排序，再根据时间排序
-#     加入 distance 列数据，表示与上一次抽样点之间的距离 m 或 m/min
-#     :param data:
-#     :param user_id:
-#     :return:
-#     """
-#     # print('user NO:', user_id)
-#     user_data = data.loc[data['TERMINALNO'] == user_id, :]
-#     #temp 中存储了某个特定用户的所有数据
-#     user_data = user_data.sort_values(by=['TRIP_ID', 'TIME'])
-#     #按照TRIP_ID,TIME排序
-#     user_data.index = range(len(user_data))
-#     # todo wash the trip_id data
-#     trip_id = list(user_data['TRIP_ID'])
-#     lon = list(user_data['LONGITUDE'])
-#     lat = list(user_data['LATITUDE'])
-#     distance = [0]
-#     for i in range(1, len(lat)):
-#         if trip_id[i] == trip_id[i - 1]:
-#             distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
-#         else:
-#             distance.append(0)
-#     # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
-#     # 也可以看作是单位 m/min 的速度
-#     user_data['DISTANCE'] = distance
-#     return user_data
+def get_user_data(data, user_id):
+    """
+    输出特定用户的所有数据，并根据trip排序，再根据时间排序
+    加入 distance 列数据，表示与上一次抽样点之间的距离 m 或 m/min
+    :param data:
+    :param user_id:
+    :return:
+    """
+    # print('user NO:', user_id)
+    user_data = data.loc[data['TERMINALNO'] == user_id, :]
+    #temp 中存储了某个特定用户的所有数据
+    user_data = user_data.sort_values(by=['TRIP_ID', 'TIME'])
+    #按照TRIP_ID,TIME排序
+    user_data.index = range(len(user_data))
+    # todo wash the trip_id data
+    trip_id = list(user_data['TRIP_ID'])
+    lon = list(user_data['LONGITUDE'])
+    lat = list(user_data['LATITUDE'])
+    distance = [0]
+    for i in range(1, len(lat)):
+        if trip_id[i] == trip_id[i - 1]:
+            distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
+        else:
+            distance.append(0)
+    # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
+    # 也可以看作是单位 m/min 的速度
+    user_data['DISTANCE'] = distance
+    return user_data
 
 
 def generate_trip_ids(user_data):
@@ -77,35 +77,35 @@ def generate_trip_ids(user_data):
     user_data['TRIP_ID'] = trip_ids
     return user_data
 
-def get_user_data(data, user_id):
-    """
-    输出特定用户的所有数据，并根据trip排序，再根据时间排序
-    加入 distance 列数据，表示与上一次抽样点之间的距离 m 或 m/min
-    :param data:
-    :param user_id:
-    :return:
-    """
-    # print('user NO:', user_id)
-    user_data = data.loc[data['TERMINALNO'] == user_id, :]
-    #temp 中存储了某个特定用户的所有数据
-    user_data = generate_trip_ids(user_data)
-    trip_id = list(user_data['TRIP_ID'])
-    lon = list(user_data['LONGITUDE'])
-    lat = list(user_data['LATITUDE'])
-    time = list(user_data['TIME'])
-    distance = [0]
-    for i in range(1, len(lat)):
-        if trip_id[i] == trip_id[i - 1]:
-            if time[i]-time[i-1] != 0:
-                distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1])*60/(time[i]-time[i-1]))
-            else:
-                distance.append(0)
-        else:
-            distance.append(0)
-    # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
-    # 也可以看作是单位 m/min 的速度
-    user_data['DISTANCE'] = distance
-    return user_data
+# def get_user_data(data, user_id):
+#     """
+#     输出特定用户的所有数据，并根据trip排序，再根据时间排序
+#     加入 distance 列数据，表示与上一次抽样点之间的距离 m 或 m/min
+#     :param data:
+#     :param user_id:
+#     :return:
+#     """
+#     # print('user NO:', user_id)
+#     user_data = data.loc[data['TERMINALNO'] == user_id, :]
+#     #temp 中存储了某个特定用户的所有数据
+#     user_data = generate_trip_ids(user_data)
+#     trip_id = list(user_data['TRIP_ID'])
+#     lon = list(user_data['LONGITUDE'])
+#     lat = list(user_data['LATITUDE'])
+#     time = list(user_data['TIME'])
+#     distance = [0]
+#     for i in range(1, len(lat)):
+#         if trip_id[i] == trip_id[i - 1]:
+#             if time[i]-time[i-1] != 0:
+#                 distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1])*60/(time[i]-time[i-1]))
+#             else:
+#                 distance.append(0)
+#         else:
+#             distance.append(0)
+#     # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
+#     # 也可以看作是单位 m/min 的速度
+#     user_data['DISTANCE'] = distance
+#     return user_data
 
 def get_record_num(user_data):
     record_num = user_data.shape[0]
