@@ -19,10 +19,13 @@ path_test = "/data/dm/test.csv"  # 测试文件
 
 feature = ['num_of_records', 'num_of_trips', 'num_of_state_0'
         , 'num_of_state_1', 'num_of_state_2','num_of_state_3', 'num_of_state_4'
-        ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'tp0', 'tp1'
-        , 'tp2', 'tp3', 'tp4', 'tp5', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
-        , 'a7', 'loc0', 'loc1', 'loc2', 'duration']
+        ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
+        , 'a7', 'loc0', 'loc1', 'loc2', 'duration', '24tp0', '24tp1', '24tp2'
+    , '24tp3', '24tp4', '24tp5', '24tp6', '24tp7', '24tp8', '24tp9', '24tp10'
+    , '24tp11', '24tp12', '24tp13', '24tp14', '24tp15', '24tp16', '24tp17'
+    , '24tp18', '24tp19', '24tp20', '24tp21', '24tp22', '24tp23']
 #, 'sf0', 'sf1', 'sf2', 'sf3'
+# , 'tp0', 'tp1', 'tp2', 'tp3', 'tp4', 'tp5'
 #todo 4 add new feature name
 
 def read_csv(path):
@@ -49,7 +52,7 @@ def train_model():
         "colsample_bytree": .35, "scale_pos_weight": 0.9# "nthread":16
     }
     df_train = xgb.DMatrix(train_set[feature].fillna(-1), label)
-    gbm = xgb.train(params, df_train, num_boost_round=1000)
+    gbm = xgb.train(params, df_train, num_boost_round=1120)
     pickle.dump(gbm, open("model.pickle.dat", "wb"))
     print("Model Trained!")
 

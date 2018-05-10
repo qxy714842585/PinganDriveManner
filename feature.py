@@ -225,6 +225,62 @@ def get_location(user_data):
     b = a[0][0]
     return [int(i) for i in b]
 
+def get_location_avg(user_data):
+    freq = get_location_area(user_data)
+    freq_dict = {'000': 0, '001': 0, '010': 0, '011': 0
+        , '100': 0, '101': 0, '110': 0, '111': 0}
+    for i in freq_dict:
+        freq_dict[i] = freq.pop(0)
+    a = sorted(freq_dict.items(), key=lambda e:e[1])
+    b = a[0][0]
+    return [int(i) for i in b]
+
+
+def get_time_period_24(user_data):
+    record_num = user_data.shape[0]
+    temp = pd.DataFrame()
+    temp['hour'] = user_data['TIME'].apply(lambda x:datetime.datetime.fromtimestamp(x).hour)
+    time_period_freq = []
+    for i in range(24):
+        p_num = temp.loc[temp['hour']==i].shape[0]
+        p_freq = p_num/record_num
+        time_period_freq.append(p_freq)
+    return time_period_freq
+
+
+def get_steep_duration(user_data):
+    trip_id = list(user_data['TRIP_ID'])
+    h = list(user_data['HEIGHT'])
+    t = list(user_data['TIME'])
+    dH, dt, tan = [0], [0], [0]
+
+    for i in range(1, len(h)):
+        if trip_id[i] == trip_id[i - 1]:
+            dH.append(h[i] - h[i - 1])
+            dt.append(t[i] - t[i - 1])
+        else:
+            dH.append(0)
+            dt.append(0)
+        if user_data['DISTANCE'][i] == 0:
+            tan.append(0)
+        else:
+            tan.append(dH[i] / (user_data['DISTANCE'][i] * (t[i] - t[i - 1])) * 60)
+
+    temp = pd.DataFrame()
+    temp['trip_id'] = user_data['TRIP_ID']
+    temp['dH'] = dH
+    temp['tan'] = tan
+    temp['dt'] = dt
+
+    up_steep_tan = temp['tan'].max() / 4
+    total_up = temp[temp['tan'] > up_steep_tan]['dt'].sum()
+    avg_up = total_up / user_data['TRIP_ID'].nunique()
+    down_steep_tan = temp['tan'].min() / 4
+    total_down = temp[temp['tan'] < down_steep_tan]['dt'].sum()
+    avg_down = total_down / user_data['TRIP_ID'].nunique()
+    steep_duration = [total_up, avg_up, total_down, avg_down]
+    return steep_duration
+
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -249,6 +305,9 @@ def form_user_feature(user_data, user_id):
     user_feature.extend(get_duration(user_data))
     user_feature.extend(get_speed_freq(user_data))
     user_feature.extend(get_location(user_data))
+    user_feature.extend(get_time_period_24(user_data))
+    user_feature.extend(get_location_avg(user_data))
+    user_feature.extend(get_steep_duration(user_data))
 
         #todo 2 add new feature list before this line
 
@@ -268,7 +327,11 @@ def form_dataset(data):
         ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'tp0', 'tp1'
         , 'tp2', 'tp3', 'tp4', 'tp5', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
         , 'a7', 'duration', 'sf0', 'sf1', 'sf2', 'sf3', 'loc0', 'loc1', 'loc2'
-        , 'target']
+        , '24tp0', '24tp1', '24tp2', '24tp3', '24tp4', '24tp5', '24tp6', '24tp7'
+        , '24tp8', '24tp9', '24tp10', '24tp11', '24tp12', '24tp13', '24tp14', '24tp15'
+        , '24tp16', '24tp17', '24tp18', '24tp19', '24tp20', '24tp21', '24tp22'
+        , '24tp23', 'loc_avg0', 'loc_avg1', 'loc_avg2', 'steep0','steep1', 'steep2'
+        , 'steep3', 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name

@@ -20,8 +20,8 @@ path_test = "/data/dm/test.csv"  # 测试文件
 feature = ['num_of_records', 'num_of_trips', 'num_of_state_0'
         , 'num_of_state_1', 'num_of_state_2','num_of_state_3', 'num_of_state_4'
         ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'tp0', 'tp1'
-        , 'tp2', 'tp3', 'tp4', 'tp5', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
-        , 'a7', 'duration', 'sf0', 'sf1', 'sf2', 'sf3']
+        , 'tp2', 'tp3', 'tp4', 'tp5', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6'
+        , 'a7', 'loc0', 'loc1', 'loc2', 'duration']
 #todo 4 add new feature name
 
 def read_csv(path):
@@ -65,7 +65,7 @@ def train_model():
     # fix random seed for reproducibility
     numpy.random.seed(seed)
     model = baseline_model()
-    model.fit(x, label, batch_size=1000, epochs=200, validation_split=0.2)
+    model.fit(x, label, batch_size=1000, epochs=30, validation_split=0.2)
     print("Model Trained!")
     return scaler, model
 
