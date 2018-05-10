@@ -5,7 +5,7 @@
 # @Software: PyCharm
 
 import datetime
-from math import radians, cos, sin, asin, sqrt
+from math import *
 
 import pandas as pd
 
@@ -281,6 +281,69 @@ def get_steep_duration(user_data):
     steep_duration = [total_up, avg_up, total_down, avg_down]
     return steep_duration
 
+# ********************************转弯次数**************************************
+
+def get_azimuth(lon0, lat0, lon1, lat1):
+    distance_North = lat1 - lat0
+    distance_East = -cos(lat0) * (lon1 - lon0)
+    bearing = atan2(distance_East, distance_North)
+    return bearing
+
+def get_angle_diff(angle2, angle1):
+    diff = angle2 - angle1
+    while diff > pi:
+        diff -= 2 * pi
+    while diff < -pi:
+        diff += 2 * pi
+    return diff
+
+def get_turn_num(trip_data):
+    last_lon = -1
+    last_lat = -1
+    direction = []
+    for index, row in trip_data.iterrows():
+        if last_lon == -1 and last_lat == -1:
+            last_lon = row['LONGITUDE']
+            last_lat = row['LATITUDE']
+            continue
+        lon = row['LONGITUDE']
+        lat = row['LATITUDE']
+        if haversine1(last_lon, last_lat, lon, lat) > 50:
+            direction.append(get_azimuth(last_lon, last_lat, lon, lat))
+        last_lon = lon
+        last_lat = lat
+    turn_left = 0
+    turn_right = 0
+    turn_round = 0
+    jump_next = False
+    for i in range(len(direction) - 1):
+        if jump_next:
+            jump_next = False
+            continue
+        diff = get_angle_diff(direction[i + 1], direction[i])
+        if abs(diff) > 150 * pi / 180:
+            turn_round += 1
+        elif diff > 35 * pi / 180:
+            turn_right += 1
+            jump_next = True
+        elif diff < -35 * pi / 180:
+            turn_left += 1
+            jump_next = True
+    return [turn_left, turn_right, turn_left + turn_right, turn_round]
+
+# return [turn_left, turn_right, turn_sum, turn_round]
+def get_avg_turn_num(user_data):
+    trip_list = user_data['TRIP_ID'].unique()
+    turn = [0, 0, 0, 0]
+    for trip in trip_list:
+        ret = get_turn_num(user_data.loc[user_data['TRIP_ID'] == trip, :].sort_values(by='TIME', ascending=True))
+        for i in range(4):
+            turn[i] += ret[i]
+    for i in range(4):
+        turn[i] = turn[i] * 1.0 / len(trip_list)
+    return turn
+
+# ********************************************************************
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -308,6 +371,7 @@ def form_user_feature(user_data, user_id):
     user_feature.extend(get_time_period_24(user_data))
     user_feature.extend(get_location_avg(user_data))
     user_feature.extend(get_steep_duration(user_data))
+    user_feature.extend(get_avg_turn_num(user_data))
 
         #todo 2 add new feature list before this line
 
@@ -331,7 +395,7 @@ def form_dataset(data):
         , '24tp8', '24tp9', '24tp10', '24tp11', '24tp12', '24tp13', '24tp14', '24tp15'
         , '24tp16', '24tp17', '24tp18', '24tp19', '24tp20', '24tp21', '24tp22'
         , '24tp23', 'loc_avg0', 'loc_avg1', 'loc_avg2', 'steep0','steep1', 'steep2'
-        , 'steep3', 'target']
+        , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name
