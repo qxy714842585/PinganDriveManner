@@ -24,8 +24,12 @@ feature = ['num_of_records', 'num_of_trips', 'num_of_state_0'
     , '24tp3', '24tp4', '24tp5', '24tp6', '24tp7', '24tp8', '24tp9', '24tp10'
     , '24tp11', '24tp12', '24tp13', '24tp14', '24tp15', '24tp16', '24tp17'
     , '24tp18', '24tp19', '24tp20', '24tp21', '24tp22', '24tp23']
+# 47
 #, 'sf0', 'sf1', 'sf2', 'sf3'
 # , 'tp0', 'tp1', 'tp2', 'tp3', 'tp4', 'tp5'
+# , 'loc_avg0', 'loc_avg1', 'loc_avg2'
+# , 'steep0','steep1', 'steep2', 'steep3'
+# , 'turn_n0','turn_n1', 'turn_n2', 'turn_n3'
 #todo 4 add new feature name
 
 def read_csv(path):
