@@ -344,6 +344,25 @@ def get_avg_turn_num(user_data):
     return turn
 
 # ********************************************************************
+
+def get_Height_change(user_data):
+    trip_id = list(user_data['TRIP_ID'])
+    h = list(user_data['HEIGHT'])
+    dH = [0]
+    for i in range(1, len(h)):
+        if trip_id[i] == trip_id[i - 1]:
+            dH.append(h[i] - h[i-1])
+        else:
+            dH.append(0)
+    temp = pd.DataFrame()
+    temp['dH'] =  dH
+    temp['trip_id'] = trip_id
+    up_dH = sum(temp[temp['dH'] > 0]['dH'])/temp['trip_id'].nunique()
+    down_dH = -sum(temp[temp['dH'] < 0]['dH'])/temp['trip_id'].nunique()
+    total_dH = up_dH + down_dH
+    Height_change = [up_dH, down_dH, total_dH]
+    return Height_change
+
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -372,6 +391,7 @@ def form_user_feature(user_data, user_id):
     user_feature.extend(get_location_avg(user_data))
     user_feature.extend(get_steep_duration(user_data))
     user_feature.extend(get_avg_turn_num(user_data))
+    user_feature.extend(get_Height_change(user_data))
 
         #todo 2 add new feature list before this line
 
@@ -395,7 +415,7 @@ def form_dataset(data):
         , '24tp8', '24tp9', '24tp10', '24tp11', '24tp12', '24tp13', '24tp14', '24tp15'
         , '24tp16', '24tp17', '24tp18', '24tp19', '24tp20', '24tp21', '24tp22'
         , '24tp23', 'loc_avg0', 'loc_avg1', 'loc_avg2', 'steep0','steep1', 'steep2'
-        , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'target']
+        , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'H_up', 'H_down', 'H_total', 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name
