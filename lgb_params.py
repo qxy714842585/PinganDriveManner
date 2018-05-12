@@ -50,18 +50,19 @@ x_train = train[feature].fillna(-1)
 y_val = val['target']
 x_val = val[feature].fillna(-1)
 
-print('设置参数')
+# print('设置参数')
 params = {'boosting_type': 'gbdt', 'objective': 'regression', 'metric': '12', }
 
-print('交叉验证')
+# print('交叉验证')
 min_merror = float('Inf')
 best_params = {}
 
-print('数据转换')
+# print('数据转换')
 lgb_train = lgb.Dataset(x_train, y_train, free_raw_data=False)
 lgb_eval = lgb.Dataset(x_val, y_val, reference=lgb_train, free_raw_data=False)
 
-print("调参1：提高准确率")
+# print("调参1：提高准确率")
+print('Params_1')
 for num_leaves in range(20, 200, 5):
     for max_depth in range(3, 8, 1):
         params['num_leaves'] = num_leaves
@@ -82,7 +83,8 @@ for num_leaves in range(20, 200, 5):
 # params['max_depth'] = best_params['max_depth']
 params = get_params(params, best_params)
 
-print("调参2：降低过拟合")
+# print("调参2：降低过拟合")
+print('Params_2')
 for max_bin in range(1, 255, 5):
     for min_data_in_leaf in range(10, 200, 5):
         params['max_bin'] = max_bin
@@ -103,7 +105,8 @@ for max_bin in range(1, 255, 5):
 # params['min_data_in_leaf'] = best_params['min_data_in_leaf']
 params = get_params(params, best_params)
 
-print("调参3：降低过拟合")
+# print("调参3：降低过拟合")
+print('Params_3')
 for feature_fraction in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
     for bagging_fraction in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         for bagging_freq in range(0, 50, 5):
@@ -128,7 +131,8 @@ for feature_fraction in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
 # params['bagging_freq'] = best_params['bagging_freq']
 params = get_params(params, best_params)
 
-print("调参4：降低过拟合")
+# print("调参4：降低过拟合")
+print('Params_4')
 for lambda_l1 in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
     for lambda_l2 in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
         for min_split_gain in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
