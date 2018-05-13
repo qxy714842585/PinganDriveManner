@@ -52,12 +52,16 @@ def train_model():
     train_set = form_dataset(train)
     label = train_set['target']
     params = {"objective": 'reg:linear', "eval_metric": 'rmse', "seed": 1123, "booster": "gbtree",
-        "min_child_weight": 5, "gamma": 0.1, "max_depth": 3, "eta": 0.01, "silent": 1, "subsample": 0.65,
-        "colsample_bytree": .35, "scale_pos_weight": 0.9# "nthread":16
+        "min_child_weight": 5, "gamma": 0.1, "max_depth": 3, "eta": 0.01, "silent": 1, "subsample": 0.8,
+        "colsample_bytree": .2, "scale_pos_weight": 0.9# "nthread":16
     }
     df_train = xgb.DMatrix(train_set[feature].fillna(-1), label)
-    gbm = xgb.train(params, df_train, num_boost_round=1000)
+    gbm = xgb.train(params, df_train,valid_sets=df_train , num_boost_round=3000, early_stopping_rounds=60)
     pickle.dump(gbm, open("model.pickle.dat", "wb"))
+    try:
+        print(gbm.best_iteration)
+    except:
+        pass
     print("Model Trained!")
 
 def predict_y():
