@@ -48,7 +48,7 @@ def get_user_data(data, user_id):
     lon = list(user_data['LONGITUDE'])
     lat = list(user_data['LATITUDE'])
     distance = [0]
-    dis_sum = []
+    dis_sum = [0]
     time = list(user_data['TIME'])
     for i in range(1, len(lat)):
         if trip_id[i] == trip_id[i - 1]:
