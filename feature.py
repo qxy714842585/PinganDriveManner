@@ -388,7 +388,7 @@ def get_night_drive(user_data):
     temp['date'] = user_data['TIME'].apply(lambda x:datetime.date.fromtimestamp(x))
     num_of_night_drive = temp.loc[temp['hour'].isin([23, 0, 1, 2, 3, 4])].shape[0]
     night_drive = num_of_night_drive/temp['date'].nunique()
-    return night_drive
+    return [night_drive]
 
 
 def get_dis_per_day(user_data):
