@@ -48,14 +48,23 @@ def get_user_data(data, user_id):
     lon = list(user_data['LONGITUDE'])
     lat = list(user_data['LATITUDE'])
     distance = [0]
+    dis_sum = []
+    time = list(user_data['TIME'])
     for i in range(1, len(lat)):
         if trip_id[i] == trip_id[i - 1]:
-            distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
+            if time[i]-time[i-1] != 0:
+                distance.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]) * 60 / (time[i] - time[i - 1]))
+                dis_sum.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
+            else:
+                distance.append(0)
+                dis_sum.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
         else:
             distance.append(0)
+            dis_sum.append(0)
     # distance表示两次采样之间的距离，每个trip中的初始数据行 distance = 0
     # 也可以看作是单位 m/min 的速度
     user_data['DISTANCE'] = distance
+    user_data['DIS_SUM'] = dis_sum
     return user_data
 
 
@@ -249,6 +258,11 @@ def get_time_period_24(user_data):
 
 
 def get_steep_duration(user_data):
+    """
+    计算陡坡    陡坡判定 上：>tan.max()/4 下： <tan.min()/4
+    :param user_data:
+    :return: steep_duration = [total_up, avg_up, total_down, avg_down]
+    """
     trip_id = list(user_data['TRIP_ID'])
     h = list(user_data['HEIGHT'])
     t = list(user_data['TIME'])
@@ -264,7 +278,7 @@ def get_steep_duration(user_data):
         if user_data['DISTANCE'][i] == 0:
             tan.append(0)
         else:
-            tan.append(dH[i] / (user_data['DISTANCE'][i] * (t[i] - t[i - 1])) * 60)
+            tan.append(dH[i] / user_data['DIS_SUM'][i])
 
     temp = pd.DataFrame()
     temp['trip_id'] = user_data['TRIP_ID']
@@ -272,11 +286,10 @@ def get_steep_duration(user_data):
     temp['tan'] = tan
     temp['dt'] = dt
 
-    up_steep_tan = temp['tan'].max() / 4
-    total_up = temp[temp['tan'] > up_steep_tan]['dt'].sum()
+    total_up = temp[temp['tan'] > 0.2]['dt'].sum()
     avg_up = total_up / user_data['TRIP_ID'].nunique()
-    down_steep_tan = temp['tan'].min() / 4
-    total_down = temp[temp['tan'] < down_steep_tan]['dt'].sum()
+
+    total_down = temp[temp['tan'] < -0.2]['dt'].sum()
     avg_down = total_down / user_data['TRIP_ID'].nunique()
     steep_duration = [total_up, avg_up, total_down, avg_down]
     return steep_duration
@@ -363,6 +376,32 @@ def get_Height_change(user_data):
     Height_change = [up_dH, down_dH, total_dH]
     return Height_change
 
+
+def get_night_drive(user_data):
+    """
+    #日均夜车条数(23:00-5:00)
+	:param user_data:
+	:return:
+	"""
+    temp = pd.DataFrame()
+    temp['hour'] = user_data['TIME'].apply(lambda x:datetime.datetime.fromtimestamp(x).hour)
+    temp['date'] = user_data['TIME'].apply(lambda x:datetime.date.fromtimestamp(x))
+    num_of_night_drive = temp.loc[temp['hour'].isin([23, 0, 1, 2, 3, 4])].shape[0]
+    night_drive = num_of_night_drive/temp['date'].nunique()
+    return night_drive
+
+
+def get_dis_per_day(user_data):
+    """
+    user每日里程
+	:param user_data:
+	:return:
+	"""
+    temp = pd.DataFrame()
+    temp['date'] = user_data['TIME'].apply(lambda x:datetime.date.fromtimestamp(x))
+    dis_per_day = user_data['DIS_SUM'].sum()/temp['date'].nunique()
+    return dis_per_day
+
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -392,6 +431,8 @@ def form_user_feature(user_data, user_id):
     user_feature.extend(get_steep_duration(user_data))
     user_feature.extend(get_avg_turn_num(user_data))
     user_feature.extend(get_Height_change(user_data))
+    user_feature.extend(get_night_drive(user_data))
+    user_feature.extend(get_dis_per_day(user_data))
 
         #todo 2 add new feature list before this line
 
@@ -415,7 +456,8 @@ def form_dataset(data):
         , '24tp8', '24tp9', '24tp10', '24tp11', '24tp12', '24tp13', '24tp14', '24tp15'
         , '24tp16', '24tp17', '24tp18', '24tp19', '24tp20', '24tp21', '24tp22'
         , '24tp23', 'loc_avg0', 'loc_avg1', 'loc_avg2', 'steep0','steep1', 'steep2'
-        , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'H_up', 'H_down', 'H_total', 'target']
+        , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'H_up', 'H_down', 'H_total'
+        , 'night_drive', 'dis_pday', 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name
