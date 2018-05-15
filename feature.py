@@ -57,7 +57,7 @@ def get_user_data(data, user_id):
                 dis_sum.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
             else:
                 distance.append(0)
-                dis_sum.append(haversine1(lon[i], lat[i], lon[i - 1], lat[i - 1]))
+                dis_sum.append(0)
         else:
             distance.append(0)
             dis_sum.append(0)
@@ -400,7 +400,7 @@ def get_dis_per_day(user_data):
     temp = pd.DataFrame()
     temp['date'] = user_data['TIME'].apply(lambda x:datetime.date.fromtimestamp(x))
     dis_per_day = user_data['DIS_SUM'].sum()/temp['date'].nunique()
-    return dis_per_day
+    return [dis_per_day]
 
 #todo 1 add new feature function before this line
 
