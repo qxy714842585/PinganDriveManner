@@ -19,13 +19,13 @@ path_test = "/data/dm/test.csv"  # 测试文件
 
 feature = ['num_of_records', 'num_of_trips', 'num_of_state_0'
     , 'num_of_state_1', 'num_of_state_2','num_of_state_3', 'num_of_state_4'
-    ,'mean_speed', 'var_speed', 'mean_height', 'var_height'
+    , 'mean_speed', 'var_speed', 'mean_height', 'var_height'
     , 'tp0', 'tp1', 'tp2', 'tp3', 'tp4', 'tp5'
     , 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7'
     , 'loc0', 'loc1', 'loc2', 'duration'
     , 'turn_n0','turn_n1', 'turn_n2', 'turn_n3'
-    , 'dis_pday']
-# 34
+    ]
+# 33
 # , 'night_drive'
 #, 'sf0', 'sf1', 'sf2', 'sf3'
 # , 'tp0', 'tp1', 'tp2', 'tp3', 'tp4', 'tp5'
@@ -55,7 +55,7 @@ def train_model():
     label = train_set['target']
     params = {"objective": 'reg:linear', "eval_metric": 'rmse', "seed": 1123, "booster": "gbtree",
         "min_child_weight": 5, "gamma": 0.1, "max_depth": 3, "eta": 0.01, "silent": 1, "subsample": 0.76,
-        "colsample_bytree": .2, "scale_pos_weight": 0.9# "nthread":16
+        "colsample_bytree": .2, "scale_pos_weight": 0.8# "nthread":16
     }
     df_train = xgb.DMatrix(train_set[feature].fillna(-1), label)
     gbm = xgb.train(params, df_train, num_boost_round=1000)

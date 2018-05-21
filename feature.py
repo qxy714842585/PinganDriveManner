@@ -126,11 +126,16 @@ def get_trip_num(user_data):
 
 def get_call_state(user_data):
     call_state = []
+    call_state_time = []
+    call_state_freq = []
     record_num = user_data.shape[0]
     for i in range(5):
         state_num = user_data.loc[user_data['CALLSTATE']==i].shape[0]
+        call_state_time.append(state_num)
         state_freq = state_num/record_num
-        call_state.append(state_freq)
+        call_state_freq.append(state_freq)
+    call_state.extend(call_state_time)
+    call_state.extend(call_state_freq)
     return call_state
 
 def get_speed_feature(user_data):
@@ -402,6 +407,25 @@ def get_dis_per_day(user_data):
     dis_per_day = user_data['DIS_SUM'].sum()/temp['date'].nunique()
     return [dis_per_day]
 
+def get_dH_per_day(user_data):
+    trip_id = list(user_data['TRIP_ID'])
+    h = list(user_data['HEIGHT'])
+    dH = [0]
+    for i in range(1, len(h)):
+        if trip_id[i] == trip_id[i - 1]:
+            dH.append(h[i] - h[i-1])
+        else:
+            dH.append(0)
+    temp = pd.DataFrame()
+    temp['dH'] =  dH
+    temp['date'] = user_data['TIME'].apply(lambda x:datetime.date.fromtimestamp(x))
+    up_dH = sum(temp[temp['dH'] > 0]['dH'])/temp['date'].nunique()
+    down_dH = -sum(temp[temp['dH'] < 0]['dH'])/temp['date'].nunique()
+    total_dH = up_dH + down_dH
+    dH_per_day = [up_dH, down_dH, total_dH]
+    return dH_per_day
+
+
 #todo 1 add new feature function before this line
 
 def get_target(user_data):
@@ -433,7 +457,7 @@ def form_user_feature(user_data, user_id):
     user_feature.extend(get_Height_change(user_data))
     user_feature.extend(get_night_drive(user_data))
     user_feature.extend(get_dis_per_day(user_data))
-
+    user_feature.extend(get_dH_per_day(user_data))
         #todo 2 add new feature list before this line
 
     user_feature.extend(get_target(user_data))
@@ -447,7 +471,9 @@ def form_dataset(data):
         user_data = get_user_data(data, user_id)
         data_list.append(form_user_feature(user_data, user_id))
     data_set = pd.DataFrame(data_list)
-    feature_name = ['item', 'num_of_records', 'num_of_trips', 'num_of_state_0'
+    feature_name = ['item', 'num_of_records', 'num_of_trips','time_of_state_0'
+        , 'time_of_state_1', 'time_of_state_2','time_of_state_3', 'time_of_state_4'
+        , 'num_of_state_0'
         , 'num_of_state_1', 'num_of_state_2','num_of_state_3', 'num_of_state_4'
         ,'mean_speed', 'var_speed', 'mean_height', 'var_height', 'tp0', 'tp1'
         , 'tp2', 'tp3', 'tp4', 'tp5', 'a0','a1', 'a2', 'a3', 'a4', 'a5', 'a6'
@@ -457,7 +483,7 @@ def form_dataset(data):
         , '24tp16', '24tp17', '24tp18', '24tp19', '24tp20', '24tp21', '24tp22'
         , '24tp23', 'loc_avg0', 'loc_avg1', 'loc_avg2', 'steep0','steep1', 'steep2'
         , 'steep3', 'turn_n0','turn_n1', 'turn_n2', 'turn_n3', 'H_up', 'H_down', 'H_total'
-        , 'night_drive', 'dis_pday', 'target']
+        , 'night_drive', 'dis_pday', 'up_dH', 'down_dH', 'total_dH', 'target']
     #todo 3 add new feature name before 'target'
     try:
         data_set.columns = feature_name
